@@ -3,6 +3,7 @@
 # asdasdasdasd
 # dasdasdasdaw
 # asdawdadw
+#jsfihrefurhgf
 ?seq.along
 dumbDM=function(roads,car,packages){
   car$nextMove=sample(c(2,4,6,8),1)
