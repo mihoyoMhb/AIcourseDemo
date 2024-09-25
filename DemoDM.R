@@ -60,6 +60,81 @@ manualDM=function(roads,car,packages) {
   return (car)
 }
 
+
+#' Now it is time to write our own code for A* search algorithm
+#' The cost of V_roads and H_roads are different, needs to be calculated separately
+#' THis function is to calculate the g(x) in f(x) = g(x) + h(x) where h(x) means the ManhattanDistance
+get_Gx=function(roads, path){
+  # initialize cost
+  cost = 0
+  for(i in 1:(length(path)-1)){
+    MovingVertically = path[[i]][1] == path[[i+1]][1]
+    if(MovingVertically){
+      if(path[[i]][2] < path[[i+1]][2])
+      {
+        cost = cost + roads$vroads[path[[i]][2], path[[i]][1]]
+      }else{
+        cost = cost + roads$vroads[path[[i+1]][2], path[[i+1]][1]]
+      }
+    }else{
+      if(path[[i]][1] > path[[i+1]][1])
+      {
+        cost = cost + roads$hroads[path[[i+1]][2], path[[i+1]][1]]
+      }else{
+        cost = cost + roads$hroads[path[[i]][2], path[[i]][1]]
+      }
+    }
+  }
+  return (cost)
+}
+
+# Manhattan distance for h(x)
+get_Hx = function(start_location, end_location){
+  retrun (abs(start_location[1] - end_location[1]) + 
+          abs(start_location[2] - end_location[2]))
+}
+
+# Get the total cost f(x) = h(x) + g(x)
+get_Fx = fuction(roads, path, temp_goal){
+  curr_location = path[[len[path]]][1:2]
+  return (get_Gx(roads, path) + get_Hx(curr_location, temp_goal))
+}
+
+#' In A* algorithm, we need to check all neighbors of the current
+#' node we are looking at, so we need to define a function to search for
+#' every neighbors
+Neighbors_search = function(x, y, roads){
+  x_limit = dim(roads$hroads)[1]
+  y_limit = dim(roads$vroads)[2]
+  neighbors = matrix(, nrow = 4, ncol=2, byrow = TRUE)
+  # Add all possible horizontal and vertical neighbors
+  neighbors[,1] = c(x - 1, x, x, x + 1)
+  neighbors[,2] = c(y, y + 1, y -1, y)
+  # Check any illegal neighbors
+  neighbors = neighbors[neighbors[,1] > 0,]
+  neighbors = neighbors[neighbors[,2] > 0,]
+  neighbors = neighbors[neighbors[,1] < x_limit+1,]
+  neighbors = neighbors[neighbors[,2] < y_limit+1,]
+  return (neighbors)
+}
+
+#' In order to record the results to calculate the cost in get_Gx/Hx/Fx
+#' we create a function which returns the a path from an initial position
+#' to the position found by A* search or others
+Path_Record = function(start_location, end_location, path){
+  vectors = list(c(end_location)) # initialize the path from the end_location
+  curr = paste(end_location, collapse = ",") # Choose a start
+  
+  # Recurse the path until we reach the start of path
+  while(!all(curr == paste(start_location, collapse = ","))){
+    node = path[[curr]] # Get the previous node
+    vectors = c(vectors, list(node)) # Add to the path
+    curr = paste(node, collapse = ",")
+  }
+  # return path from start to out goal
+  return (rev(vectors))
+}
+
 #' testDM
 #'
 #' Use this to debug under multiple circumstances and to see how your function compares with the par function
