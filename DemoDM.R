@@ -63,7 +63,7 @@ manualDM=function(roads,car,packages) {
 
 #' Now it is time to write our own code for A* search algorithm
 #' The cost of V_roads and H_roads are different, needs to be calculated separately
-#' THis function is to calculate the g(x) in f(x) = g(x) + h(x) where h(x) means the ManhattanDistance
+#' This function is to calculate the g(x) in f(x) = g(x) + h(x) where h(x) means the ManhattanDistance
 get_Gx=function(roads, path){
   # initialize cost
   cost = 0
@@ -121,6 +121,13 @@ Neighbors_search = function(x, y, roads){
 #' In order to record the results to calculate the cost in get_Gx/Hx/Fx
 #' we create a function which returns the a path from an initial position
 #' to the position found by A* search or others
+#' 
+#' From General tips:
+#' You want to find the best path from where you are to where you want to go. 
+#' If you do not find the entire path, you are doing it wrong! (Admittedly, you 
+#' might not track the path, just the first move, but your algorithm should be 
+#' able to give you the entire path if you want.) 
+#' 
 Path_Record = function(start_location, end_location, path){
   vectors = list(c(end_location)) # initialize the path from the end_location
   curr = paste(end_location, collapse = ",") # Choose a start
@@ -133,6 +140,24 @@ Path_Record = function(start_location, end_location, path){
   }
   # return path from start to out goal
   return (rev(vectors))
+}
+#' Before we start the A* algorithm, we need to maintain a 
+#' priority queue which allows th insert elements
+#' Source: http://rosettacode.org/wiki/Priority_queue#R
+#' Note: We modified some codes from the source to fit the real conditions
+#' for this assignment.
+#' In A* algorithm, we need to keep track of the searched nodes which are 
+#' unnecessary to be searched again. Because it will cost more.
+#' Reference materials for A* search:
+#' 1. https://www.geeksforgeeks.org/a-search-algorithm/
+#' 2.
+#' 3.
+#' ....
+p_queue = function(){
+  
+}
+A_search = function(){
+  
 }
 
 #' testDM
