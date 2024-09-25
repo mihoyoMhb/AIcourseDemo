@@ -128,6 +128,8 @@ Neighbors_search = function(x, y, roads){
 #' might not track the path, just the first move, but your algorithm should be 
 #' able to give you the entire path if you want.) 
 #' 
+#' 
+#' https://stackoverflow.com/questions/8219476/roll-your-own-linked-list-tree-in-r
 Path_Record = function(start_location, end_location, path){
   vectors = list(c(end_location)) # initialize the path from the end_location
   curr = paste(end_location, collapse = ",") # Choose a start
@@ -159,6 +161,7 @@ p_queue = function(){
 A_search = function(){
   
 }
+
 
 #' testDM
 #'
