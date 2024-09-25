@@ -412,6 +412,8 @@ packageOn<-function(x,y,packages){
   onX=which(packages[,1]==x)
   onY=which(packages[,2]==y)
   available=intersect(notpickedup,intersect(onX,onY))
+  # intersect(onX, onY): This finds the indices of packages that have both the same x and y coordinates as the car (i.e., the car is at the package's pickup location).
+  # intersect(notpickedup, ...): This further narrows down the list of packages to those that haven't been picked up yet (status 0).
   if (length(available)!=0) {
     return (available[1])
   }
