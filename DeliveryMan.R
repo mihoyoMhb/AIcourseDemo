@@ -6,14 +6,14 @@
 #jsfihrefurhgf
 ?seq.along
 dumbDM=function(roads,car,packages){
-  car$nextMove=sample(c(2,4,6,8),1)
+  car$nextMove=sample(c(2,4,6,8),1)##(2:up,4:down,6:left,8:right)
   return (car)
 }
-
+#######平均测试数
 averageTest <- function(tests){
   sum = 0
   for (i in 1:tests) {
-    sum=sum+runDeliveryMan(aStarSearchDM, dim = 10, turns = 2000, doPlot = F, pause = 0, del = 5)
+    sum+=runDeliveryMan(aStarSearchDM, dim = 10, turns = 2000, doPlot = F, pause = 0, del = 5)
     if(i%%10==0){
       print(i)
       print(sum/i)
@@ -43,13 +43,13 @@ PriorityQueue <- function() {
     }
 
     # Insert new value in queue
-    temp <- c(queueKeys, key)
-    ord <- order(temp)
-    queueKeys <<- temp[ord]
-    queueValues <<- c(queueValues, list(value))[ord]
+    temp <- c(queueKeys, key)##Add the new key (priority) to the current list of keys (queueKeys)
+    ord <- order(temp)##sort the temp vector
+    queueKeys <<- temp[ord]##reassign queuekeys to sorted order
+    queueValues <<- c(queueValues, list(value))[ord]#Add new value to queueValues, then reorders it based on the ord sorting order
   }
   pop <- function() {
-    head <- queueValues[[1]]
+    head <- queueValues[[1]]##assign the highest priority element to head
     queueValues <<- queueValues[-1]
     queueKeys <<- queueKeys[-1]
     return (head)
@@ -74,12 +74,12 @@ getManhattanDistance=function(from, to) {
   return (abs(from[1] - to[1]) + abs(from[2] - to[2]))
 }
 
-# Return the Euclidean distance between two locations
+# Return the Euclidean distance between two locations############删？
 getEuclideanDistance=function(from, to) {
   return (sqrt((from[1] - to[1])^2 + (from[2] - to[2])^2))
 }
 
-# Return the cost of a vertical edge
+# Return the cost of a vertical edge###2=y
 getVerticalEdgeCost=function(roads, from, to) {
   if(from[2] < to[2]) {
     # Moving up
@@ -102,6 +102,7 @@ getHorizontalEdgeCost=function(roads, from, to) {
 }
 
 # Calculate edge cost (from current position to neighbor position)
+###path = list("1,2" = "1,1"）
 getEdgeCost=function(roads, path) {
   cost = 0
   for (i in 1:(length(path)-1)) {
@@ -116,6 +117,7 @@ getEdgeCost=function(roads, path) {
 }
 
 # Return the cost of an edge + a heuristic
+#####f(x) = g(x) + h(x)，path[[length(path)]] 返回路径中的最后一个节点，[1:2] 是提取该节点的 x 和 y 坐标
 getCombinedCost=function(roads, path, goal) {
   to = path[[length(path)]][1:2]
   return (getEdgeCost(roads, path) + getManhattanDistance(to, goal))
@@ -125,6 +127,7 @@ getCombinedCost=function(roads, path, goal) {
 getNeighbors=function(x, y, xSize, ySize) {
   neighbors = matrix(, nrow = 4, ncol=2, byrow = TRUE)
   # Add all possible horizontal and vertical neighbors
+  #c=culumn
   neighbors[,1] = c(x - 1, x, x, x + 1)
   neighbors[,2] = c(y, y + 1, y -1, y)
 
@@ -144,12 +147,12 @@ isGoal=function(neighbor, goal) {
   return (goal[1] == neighbor[1] && goal[2] == neighbor[2])
 }
 
-# Transform a vector representation of a node to a string
+# Transform a vector representation of a node to a string:(3,4)->"3,4"
 transformNodeToString=function(node) {
   return (paste(node[1], node[2], sep=','))
 }
 
-# Transform a string representation of a node to a vector
+# Transform a string representation of a node to a vector:"3,4"->(3,4)
 transformStringToNode=function(nodeAsString) {
   splitNode = strsplit(nodeAsString, ',')[[1]]
   x = as.integer(splitNode[1])
