@@ -206,6 +206,26 @@ PriorityQueue = function(){
   empty<-function() length(keys)==0
   list(insert = insert, pop = pop, empty = empty)
 }
+
+#return a package pickup position and delivery position
+package_goal=function(from,packages){
+  costs=NULL
+  unpicked_package<-subset(packages,packages[,5]==0)
+  if (nrow(unpicked_package)!=0){
+    for (i in nrow(unpicked_package)){
+      package=unpicked_package[i,]
+      pickup_location=package[1:2]
+      delivery_location=package[3:4]
+      pickup_cost=get_Hx(from,pickup_location)
+      delivery_cost=get_Hx(pickup_location,delivery_location)
+      total_cost=c(costs,(pickup_cost)+(delivery_cost))}
+
+}
+  return (unpicked_package[which.min(total_cost),])
+}
+
+
+
 A_search = function(){
   
 }

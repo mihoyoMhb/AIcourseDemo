@@ -261,29 +261,21 @@ generateNextMove=function(path) {
 }
 
 # Return a package pickup location which will be used as the goal for a particular search
-getGoalPackage=function(from, packages) {
-  # Select closest package from current car's location as a pickup goal
-  costs = NULL
-  unpicked = packages[which(packages[,5] %in% c(0) == TRUE),]
-  if (isTRUE(length(unpicked) == 5)) {
-    # There's only 1 unpicked package left, go for it
-    return (unpicked)
-  } else {
-    # Compute a weighted package + delivery location distance and choose the least of all
-    pickupWeight = 1
-    deliveryWeight = 0
-    for(i in 1:dim(unpicked)[1]) {
-      package = unpicked[i,]
-      pickupLocation = package[1:2]
-      deliveryLocation = package[3:4]
-      pickupCost = getManhattanDistance(from, pickupLocation)
-      deliveryCost = getManhattanDistance(pickupLocation, deliveryLocation)
-      costs = c(costs, (pickupCost*pickupWeight) + (deliveryCost*deliveryWeight))
-    }
-    return (unpicked[which.min(costs),])
-  }
-}
+getGoalPackage=function(from,packages){
+  costs=Null
+  unpicked_package<-subset(packages,packages[,5]==0)
+  if (nrow(unpicked_package)!=0){
+    for (i in nrow(unpicked_package)){
+      package=unpicked_package[i,]
+      pickup_location=package[1:2]
+      delivery_location=package[3:4]
+      pickup_cost=get_Hx(from,pickup_location)
+      delivery_cost=get_Hx(pickup_location,delivery_location)
+      total_cost=c(costs,(pickup_cost)+(delivery_cost))}
 
+}
+  return (unpicked_package[which.min(total_cost),])
+}
 # Return true if car is loaded, false otherwise
 isLoaded=function(car) {
   return (car$load != 0)
