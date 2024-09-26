@@ -143,20 +143,68 @@ Path_Record = function(start_location, end_location, path){
   # return path from start to out goal
   return (rev(vectors))
 }
-#' Before we start the A* algorithm, we need to maintain a 
+#' 1. Before we start the A* algorithm, we need to maintain a 
 #' priority queue which allows th insert elements
 #' Source: http://rosettacode.org/wiki/Priority_queue#R
 #' Note: We modified some codes from the source to fit the real conditions
 #' for this assignment.
-#' In A* algorithm, we need to keep track of the searched nodes which are 
+#' 
+#' 2. Additionally, we need a matrix to insert the checked nodes and return true
+#' if node is already existed. In A* algorithm, we need to keep track of the searched nodes which are 
 #' unnecessary to be searched again. Because it will cost more.
-#' Reference materials for A* search:
-#' 1. https://www.geeksforgeeks.org/a-search-algorithm/
-#' 2.
-#' 3.
-#' ....
-p_queue = function(){
+visited_nodes <- function(roads){
+  # Using a matrix
+  visited <- matrix(FALSE, nrow=dim(roads$hroads)[1], ncol=dim(roads$vroads)[2])
   
+  # Insert a node and set it as visited
+  insert <- function(x, y){
+    visited[x, y] <- TRUE
+  }
+  
+  # return true if a node was visited
+  exists <- function(x, y){
+    return (visited[x, y])
+  }
+  
+  # Get all visited nodes
+  getALL <- function(){
+    return (which(visited, arr.ind = TRUE))
+  }
+  
+  # set a list to call functions above
+  list(insert = insert, exists = exists, getAll = getALL)
+}
+List <- function() {
+  listValues <<- NULL
+  insert <- function(value) listValues <<- c(listValues, list(value))
+  exists <- function(value) isTRUE(which(listValues %in% list(value) == TRUE) > 0)
+  getAllValues <- function() listValues
+  list(insert = insert, exists = exists, getAllValues = getAllValues)
+}
+#' Reference materials for A* search:
+#'  1. https://www.geeksforgeeks.org/a-search-algorithm/
+#'  2.
+#'  3.
+#' ....
+
+
+
+PriorityQueue = function(){
+  keys<-values<-Null
+  insert <- function(key, value){
+    ord<-finalInterval(key, keys)
+    keys<<-append(keys, key, ord)
+    values<<-append(value, value, ord)
+  }
+  pop<-function() {
+    head <- list(key=keys[1], value=values[[1]])
+    values <<- value[-1]
+    keys <<- keys[-1]
+    return(head)
+    
+  }
+  empty<-function() length(keys)==0
+  list(insert = insert, pop = pop, empty = empty)
 }
 A_search = function(){
   
