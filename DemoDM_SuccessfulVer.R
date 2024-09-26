@@ -104,7 +104,7 @@ PriorityQueue <- function() {
     return (head)
   }
   
-  empty <- function() length(queueKeys) == 0
+  empty <- function() {length(queueKeys) == 0}
   getValueIndex <- function(value) which(queueValues %in% list(value) == TRUE)
   
   list(insert = insert, pop = pop, empty = empty)
@@ -213,47 +213,8 @@ A_Search = function(from, to, roads, packages) {
   
   frontier$insert(0, from)  # 初始代价为0，插入起点
   pathCost[[paste(from, collapse = ",")]] = 0  # 起点路径代价设为0
-  
-<<<<<<< Updated upstream
-  # Get all visited nodes
-  getALL <- function(){
-    return (which(visited, arr.ind = TRUE))
-  }
-  
-  # set a list to call functions above
-  list(insert = insert, exists = exists, getAll = getALL)
-}
-List <- function() {
-  listValues <<- NULL
-  insert <- function(value) listValues <<- c(listValues, list(value))
-  exists <- function(value) isTRUE(which(listValues %in% list(value) == TRUE) > 0)
-  getAllValues <- function() listValues
-  list(insert = insert, exists = exists, getAllValues = getAllValues)
-}
-#' Reference materials for A* search:
-#'  1. https://www.geeksforgeeks.org/a-search-algorithm/
-#'  2.
-#'  3.
-#' ....
-
-
-
-PriorityQueue = function(){
-  keys<-values<-Null
-  insert <- function(key, value){
-    ord<-finalInterval(key, keys)
-    keys<<-append(keys, key, ord)
-    values<<-append(value, value, ord)
-  }
-  pop<-function() {
-    head <- list(key=keys[1], value=values[[1]])
-    values <<- value[-1]
-    keys <<- keys[-1]
-    return(head)
-=======
   while (!frontier$empty()) {
     node = frontier$pop()
->>>>>>> Stashed changes
     
     # 如果到达目标节点，生成路径并返回
     if (node[1] == to[1] && node[2] == to[2]) {
@@ -284,9 +245,6 @@ PriorityQueue = function(){
     visited$insert(node)  # 将节点标记为已访问
   }
 }
-<<<<<<< Updated upstream
-A_search = function(){
-=======
 
 # Given a path, return the best next move car can make towards goal
 generateNextMove=function(path) {
@@ -323,7 +281,6 @@ generateNextMove=function(path) {
 getPackage=function(from, packages){
   costs = NULL
   unpicked_package = subset(packages, packages[,5] == 0)
->>>>>>> Stashed changes
   
   # 如果没有包裹需要取，返回空
   if (nrow(unpicked_package) == 0) {
