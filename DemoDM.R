@@ -174,6 +174,7 @@ visited_nodes <- function(roads){
   # set a list to call functions above
   list(insert = insert, exists = exists, getAll = getALL)
 }
+#AAAAAA
 List <- function() {
   listValues <<- NULL
   insert <- function(value) listValues <<- c(listValues, list(value))
@@ -205,6 +206,30 @@ PriorityQueue = function(){
   }
   empty<-function() length(keys)==0
   list(insert = insert, pop = pop, empty = empty)
+}
+# AAAAAAAAAAAAAAAAAAAAA
+nextMove=function(path){
+  if (isTRUE(length(path)==1)){
+    return(5)
+  }
+  current_x=path[1][1]
+  current_y=path[1][2]
+  next_x=path[2][1]
+  next_y=path[2][2]
+  if (isTRUE(nextX > currX)) {
+    return (6) # Right
+  }
+  if (isTRUE(nextX < currX)) {
+    return (4) # Left
+  }
+  if (isTRUE(nextY > currY)) {
+    return (8) # Up
+  }
+  if (isTRUE(nextY < currY)) {
+    return (2) # Down
+  }
+
+  print('Error! Unable to find a suitable move.')
 }
 
 #return a package pickup position and delivery position

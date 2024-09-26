@@ -233,7 +233,7 @@ aStarSearch=function(from, to, roads, packages) {
 generateNextMove=function(path) {
   if(isTRUE(length(path) == 1)) {
     # This happens when the package pickup and delivery locations are equal
-    return (5)
+    return (500)
   }
 
   currX = path[[1]][1]
@@ -262,15 +262,15 @@ generateNextMove=function(path) {
 
 # Return a package pickup location which will be used as the goal for a particular search
 getGoalPackage=function(from,packages){
-  costs=Null
+  costs=NULL
   unpicked_package<-subset(packages,packages[,5]==0)
   if (nrow(unpicked_package)!=0){
     for (i in nrow(unpicked_package)){
       package=unpicked_package[i,]
       pickup_location=package[1:2]
       delivery_location=package[3:4]
-      pickup_cost=get_Hx(from,pickup_location)
-      delivery_cost=get_Hx(pickup_location,delivery_location)
+      pickup_cost=getManhattanDistance(from,pickup_location)
+      delivery_cost=getManhattanDistance(pickup_location,delivery_location)
       total_cost=c(costs,(pickup_cost)+(delivery_cost))}
 
 }
