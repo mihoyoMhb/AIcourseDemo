@@ -59,7 +59,75 @@ manualDM=function(roads,car,packages) {
   if (car$nextMove=="q") {stop("Game terminated on user request.")}
   return (car)
 }
+averageTest <- function(tests){
+  sum = 0
+  for (i in 1:tests) {
+    sum=sum+runDeliveryMan(aStarSearchDM, dim = 10, turns = 2000, doPlot = F, pause = 0, del = 5)
+    if(i%%10==0){
+      print(i)
+      print(sum/i)
+    }
+  }
+  print(sum/i)
+  return(0)
+}
 
+# Source: http://rosettacode.org/wiki/Priority_queue#R
+# Source: https://search.r-project.org/CRAN/refmans/collections/html/priority_queue.html
+# AAAAA, 必须修改的代码段落，你们看看吧
+PriorityQueue <- function() {
+  queueKeys <<- queueValues <<- NULL
+  insert <- function(key, value) {
+    # 检查是否已经存在该值，并根据代价决定是否替换
+    index = getValueIndex(value)
+    if(length(index) > 0) {
+      if(isTRUE(key < queueKeys[[index]])) {
+        queueKeys <<- queueKeys[-index]
+        queueValues <<- queueValues[-index]
+      } else {
+        # 跳过插入操作
+        return
+      }
+    }
+    
+    # 插入新的值并排序
+    temp <- c(queueKeys, key)
+    ord <- order(temp)
+    queueKeys <<- temp[ord]
+    queueValues <<- c(queueValues, list(value))[ord]
+  }
+  
+  pop <- function() {
+    head <- queueValues[[1]]
+    queueValues <<- queueValues[-1]
+    queueKeys <<- queueKeys[-1]
+    return (head)
+  }
+  
+  empty <- function() length(queueKeys) == 0
+  getValueIndex <- function(value) which(queueValues %in% list(value) == TRUE)
+  
+  list(insert = insert, pop = pop, empty = empty)
+}
+
+
+# A simple lists which allows to insert elements on it
+# and verity if a particular element exists or not，
+# this can be used to check if current node has been used before
+# 本函数也需要被修改
+List <- function() {
+  listValues <- NULL
+  insert <- function(value) {
+    valueStr <- paste(value, collapse = ",")
+    listValues <<- c(listValues, valueStr)
+  }
+  exists <- function(value) {
+    valueStr <- paste(value, collapse = ",")
+    return (valueStr %in% listValues)
+  }
+  getAllValues <- function() listValues
+  list(insert = insert, exists = exists, getAllValues = getAllValues)
+}
 
 #' Now it is time to write our own code for A* search algorithm
 #' The cost of V_roads and H_roads are different, needs to be calculated separately
@@ -90,19 +158,21 @@ get_Gx=function(roads, path){
 
 # Manhattan distance for h(x)
 get_Hx = function(start_location, end_location){
-  retrun (abs(start_location[1] - end_location[1]) + 
-          abs(start_location[2] - end_location[2]))
+  return (abs(start_location[1] - end_location[1]) + 
+            abs(start_location[2] - end_location[2]))
 }
 
 # Get the total cost f(x) = h(x) + g(x)
-get_Fx = fuction(roads, path, temp_goal){
-  curr_location = path[[len[path]]][1:2]
+get_Fx = function(roads, path, temp_goal){
+  curr_location = path[[length(path)]][1:2]
   return (get_Gx(roads, path) + get_Hx(curr_location, temp_goal))
 }
 
 #' In A* algorithm, we need to check all neighbors of the current
 #' node we are looking at, so we need to define a function to search for
 #' every neighbors
+
+# Return all available neighbors given a location
 Neighbors_search = function(x, y, roads){
   x_limit = dim(roads$hroads)[1]
   y_limit = dim(roads$vroads)[2]
@@ -118,18 +188,6 @@ Neighbors_search = function(x, y, roads){
   return (neighbors)
 }
 
-#' In order to record the results to calculate the cost in get_Gx/Hx/Fx
-#' we create a function which returns the a path from an initial position
-#' to the position found by A* search or others
-#' 
-#' From General tips:
-#' You want to find the best path from where you are to where you want to go. 
-#' If you do not find the entire path, you are doing it wrong! (Admittedly, you 
-#' might not track the path, just the first move, but your algorithm should be 
-#' able to give you the entire path if you want.) 
-#' 
-#' 
-#' https://stackoverflow.com/questions/8219476/roll-your-own-linked-list-tree-in-r
 Path_Record = function(start_location, end_location, path){
   vectors = list(c(end_location)) # initialize the path from the end_location
   curr = paste(end_location, collapse = ",") # Choose a start
@@ -140,32 +198,23 @@ Path_Record = function(start_location, end_location, path){
     vectors = c(vectors, list(node)) # Add to the path
     curr = paste(node, collapse = ",")
   }
-  # return path from start to out goal
+  # return path from start to our goal
   return (rev(vectors))
 }
-#' 1. Before we start the A* algorithm, we need to maintain a 
-#' priority queue which allows th insert elements
-#' Source: http://rosettacode.org/wiki/Priority_queue#R
-#' Note: We modified some codes from the source to fit the real conditions
-#' for this assignment.
-#' 
-#' 2. Additionally, we need a matrix to insert the checked nodes and return true
-#' if node is already existed. In A* algorithm, we need to keep track of the searched nodes which are 
-#' unnecessary to be searched again. Because it will cost more.
-visited_nodes <- function(roads){
-  # Using a matrix
-  visited <- matrix(FALSE, nrow=dim(roads$hroads)[1], ncol=dim(roads$vroads)[2])
+# aStarSearch
+A_Search = function(from, to, roads, packages) {
+  xSize = dim(roads$hroads)[1]
+  ySize = dim(roads$vroads)[2]
   
-  # Insert a node and set it as visited
-  insert <- function(x, y){
-    visited[x, y] <- TRUE
-  }
+  visited = List()  # 用于记录已经访问过的节点
+  frontier = PriorityQueue()  # 优先队列用于扩展节点
+  path = list()  # 用于记录路径
+  pathCost = list()  # 新增：用于记录每个节点的路径代价
   
-  # return true if a node was visited
-  exists <- function(x, y){
-    return (visited[x, y])
-  }
+  frontier$insert(0, from)  # 初始代价为0，插入起点
+  pathCost[[paste(from, collapse = ",")]] = 0  # 起点路径代价设为0
   
+<<<<<<< Updated upstream
   # Get all visited nodes
   getALL <- function(){
     return (which(visited, arr.ind = TRUE))
@@ -201,16 +250,117 @@ PriorityQueue = function(){
     values <<- value[-1]
     keys <<- keys[-1]
     return(head)
+=======
+  while (!frontier$empty()) {
+    node = frontier$pop()
+>>>>>>> Stashed changes
     
+    # 如果到达目标节点，生成路径并返回
+    if (node[1] == to[1] && node[2] == to[2]) {
+      return (Path_Record(from, node, path))
+    }
+    
+    neighbors = Neighbors_search(node[1], node[2], roads)
+    for (i in 1:dim(neighbors)[1]) {
+      neighbor = neighbors[i,]
+      
+      # 检查是否已经访问过该节点
+      if (!visited$exists(neighbor)) {
+        # 计算到该邻居节点的路径代价
+        currentCost = pathCost[[paste(node, collapse = ",")]] + get_Gx(roads, list(node, neighbor))
+        
+        # 如果邻居节点已经在 pathCost 中且代价更高，则更新
+        neighborStr = paste(neighbor, collapse = ",")
+        if (is.null(pathCost[[neighborStr]]) || currentCost < pathCost[[neighborStr]]) {
+          pathCost[[neighborStr]] = currentCost  # 更新邻居节点的最小代价
+          path[[neighborStr]] = node  # 更新邻居节点的前驱节点
+          combinedCost = currentCost + get_Hx(neighbor, to)  # 结合代价计算
+          
+          # 将邻居节点插入到优先队列中
+          frontier$insert(combinedCost, neighbor)
+        }
+      }
+    }
+    visited$insert(node)  # 将节点标记为已访问
   }
-  empty<-function() length(keys)==0
-  list(insert = insert, pop = pop, empty = empty)
 }
+<<<<<<< Updated upstream
 A_search = function(){
+=======
+
+# Given a path, return the best next move car can make towards goal
+generateNextMove=function(path) {
+  if(isTRUE(length(path) == 1)) {
+    # This happens when the package pickup and delivery locations are equal
+    return (5)
+  }
   
+  currX = path[[1]][1]
+  currY = path[[1]][2]
+  nextX = path[[2]][1]
+  nextY = path[[2]][2]
+  
+  # Move is horizontal
+  if (isTRUE(nextX > currX)) {
+    return (6) # Right
+  }
+  if (isTRUE(nextX < currX)) {
+    return (4) # Left
+  }
+  
+  # Move is vertical
+  if (isTRUE(nextY > currY)) {
+    return (8) # Up
+  }
+  if (isTRUE(nextY < currY)) {
+    return (2) # Down
+  }
+  
+  print('Error! Unable to find a suitable move.')
 }
 
+# Return a package pickup location which will be used as the goal for a particular search
+getPackage=function(from, packages){
+  costs = NULL
+  unpicked_package = subset(packages, packages[,5] == 0)
+>>>>>>> Stashed changes
+  
+  # 如果没有包裹需要取，返回空
+  if (nrow(unpicked_package) == 0) {
+    print("No unpicked packages available.")
+    return (NULL)  # 没有包裹
+  }
+  
+  # 计算每个包裹的取送代价
+  for (i in 1:nrow(unpicked_package)){
+    package = unpicked_package[i,]
+    pickup_location = package[1:2]
+    delivery_location = package[3:4]
+    pickup_cost = get_Hx(from, pickup_location)
+    delivery_cost = get_Hx(pickup_location, delivery_location)
+    costs = c(costs, pickup_cost + delivery_cost)
+  }
+  
+  # 返回代价最小的包裹
+  return (unpicked_package[which.min(costs),])
+}
 
+# Solve the DeliveryMan assignment using the A* search
+A_SearchDM=function(roads, car, packages) {
+  from = c(car$x, car$y)
+  to = NULL
+  if(car$load != 0) {
+    # If the car is already loaded, then it should go to the delivery location
+    to = packages[which(packages[,5] %in% c(1) == TRUE),][3:4]
+  } else {
+    # Or, to pick up the package
+    to = getPackage(from, packages)[1:2]
+  }
+  
+  path = A_Search(from, to, roads, packages)
+  car$nextMove = generateNextMove(path)
+  return (car)
+}
 #' testDM
 #'
 #' Use this to debug under multiple circumstances and to see how your function compares with the par function
@@ -221,6 +371,7 @@ A_search = function(){
 #'
 #' This set of seeds is chosen so as to include a tricky game that has pick ups and deliveries on the same
 #' spot. This will occur in the actual games you are evaluated on too.
+#'
 #'
 #' While this is dependent on the machine used, we expect your function to be able to run the 500 evaluation games on
 #' the evaluation machine in under 4 minutes (250 seconds). If the evaluation machine is slower than expected,
@@ -356,7 +507,7 @@ processNextMove<-function(car,roads,dim) {
   nextMove=car$nextMove
   if (nextMove==8) {
     if (car$y!=dim) {
-      car$wait=roads$vroads[car$x,car$y]
+      car$wait=roads$vroads[car$y,car$x]
       car$y=car$y+1
     } else {
       warning(paste("Cannot move up from y-position",car$y))
@@ -364,20 +515,20 @@ processNextMove<-function(car,roads,dim) {
   } else if (nextMove==2) {
     if (car$y!=1) {
       car$y=car$y-1
-      car$wait=roads$vroads[car$x,car$y]
+      car$wait=roads$vroads[car$y,car$x]
     } else {
       warning(paste("Cannot move down from y-position",car$y))
     }
   }  else if (nextMove==4) {
     if (car$x!=1) {
       car$x=car$x-1
-      car$wait=roads$hroads[car$x,car$y]
+      car$wait=roads$hroads[car$y,car$x]
     } else {
       warning(paste("Cannot move left from x-position",car$x))
     }
   }  else if (nextMove==6) {
     if (car$x!=dim) {
-      car$wait=roads$hroads[car$x,car$y]
+      car$wait=roads$hroads[car$y,car$x]
       car$x=car$x+1
     } else {
       warning(paste("Cannot move right from x-position",car$x))
@@ -404,8 +555,8 @@ makeDotGrid<-function(n,i) {
 
 #' @keywords internal
 makeRoadMatrices<-function(n){
-  hroads=matrix(rep(1,n*(n-1)),nrow=n-1)
-  vroads=matrix(rep(1,(n-1)*n),nrow=n)
+  hroads=matrix(rep(1,n*(n-1)),nrow=n)
+  vroads=matrix(rep(1,(n-1)*n),nrow=n-1)
   list(hroads=hroads,vroads=vroads)
 }
 
