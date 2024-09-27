@@ -90,12 +90,12 @@ get_Gx=function(roads, path){
 
 # Manhattan distance for h(x)
 get_Hx = function(start_location, end_location){
-  retrun (abs(start_location[1] - end_location[1]) + 
+  return (abs(start_location[1] - end_location[1]) + 
           abs(start_location[2] - end_location[2]))
 }
 
 # Get the total cost f(x) = h(x) + g(x)
-get_Fx = fuction(roads, path, temp_goal){
+get_Fx = function(roads, path, temp_goal){
   curr_location = path[[len[path]]][1:2]
   return (get_Gx(roads, path) + get_Hx(curr_location, temp_goal))
 }
@@ -130,19 +130,42 @@ Neighbors_search = function(x, y, roads){
 #' 
 #' 
 #' https://stackoverflow.com/questions/8219476/roll-your-own-linked-list-tree-in-r
-Path_Record = function(start_location, end_location, path){
-  vectors = list(c(end_location)) # initialize the path from the end_location
-  curr = paste(end_location, collapse = ",") # Choose a start
+
+
+# Path_Record = function(start_location, end_location, path){
+#   vectors = list(c(end_location)) # initialize the path from the end_location
+#   curr = paste(end_location, collapse = ",") # Choose a start
   
-  # Recurse the path until we reach the start of path
-  while(!all(curr == paste(start_location, collapse = ","))){
-    node = path[[curr]] # Get the previous node
-    vectors = c(vectors, list(node)) # Add to the path
-    curr = paste(node, collapse = ",")
+#   # Recurse the path until we reach the start of path
+#   while(!all(curr == paste(start_location, collapse = ","))){
+#     node = path[[curr]] # Get the previous node
+#     vectors = c(vectors, list(node)) # Add to the path
+#     curr = paste(node, collapse = ",")
+#   }
+#   # return path from start to out goal
+#   return (rev(vectors))
+# }
+
+Path_Record = function(start_location, end_location, cameFrom){
+  path = list(end_location)
+  current = paste(end_location, collapse = ",")
+  
+  while (current != paste(start_location, collapse = ",")) {
+    if (!is.null(cameFrom[[current]])) {
+      node = cameFrom[[current]]
+      path = c(list(node), path)
+      current = paste(node, collapse = ",")
+    } else {
+      # No path found
+      break
+    }
   }
-  # return path from start to out goal
-  return (rev(vectors))
+  
+  return(path)
 }
+
+
+
 #' 1. Before we start the A* algorithm, we need to maintain a 
 #' priority queue which allows th insert elements
 #' Source: http://rosettacode.org/wiki/Priority_queue#R
@@ -190,32 +213,76 @@ List <- function() {
 
 
 
-PriorityQueue = function(){
-  keys<-values<-Null
-  insert <- function(key, value){
-    ord<-finalInterval(key, keys)
-    keys<<-append(keys, key, ord)
-    values<<-append(value, value, ord)
-  }
-  pop<-function() {
-    head <- list(key=keys[1], value=values[[1]])
-    values <<- value[-1]
-    keys <<- keys[-1]
-    return(head)
+# PriorityQueue = function(){
+#   keys<-values<-Null
+#   insert <- function(key, value){
+#     ord<-finalInterval(key, keys)
+#     keys<<-append(keys, key, ord)
+#     values<<-append(value, value, ord)
+#   }
+#   pop<-function() {
+#     head <- list(key=keys[1], value=values[[1]])
+#     values <<- value[-1]
+#     keys <<- keys[-1]
+#     return(head)
     
+#   }
+#   empty<-function() length(keys)==0
+#   list(insert = insert, pop = pop, empty = empty)
+# }
+
+PriorityQueue <- function() {
+  queueKeys <- numeric()
+  queueValues <- list()
+  
+  insert <- function(key, value) {
+    # Find the position to insert the new key to keep the queue sorted
+    idx <- findInterval(key, queueKeys)
+    queueKeys <<- append(queueKeys, key, after = idx)
+    queueValues <<- append(queueValues, list(value), after = idx)
   }
-  empty<-function() length(keys)==0
-  list(insert = insert, pop = pop, empty = empty)
+  
+  pop <- function() {
+    if (length(queueKeys) == 0) {
+      return(NULL)
+    }
+    key <- queueKeys[1]
+    value <- queueValues[[1]]
+    queueKeys <<- queueKeys[-1]
+    queueValues <<- queueValues[-1]
+    return(list(key = key, value = value))
+  }
+  
+  empty <- function() {
+    length(queueKeys) == 0
+  }
+  
+  contains <- function(value) {
+    index <- which(sapply(queueValues, function(x) all(x == value)))
+    if (length(index) > 0) {
+      return(index[1])
+    } else {
+      return(0)
+    }
+  }
+  
+  remove <- function(index) {
+    queueKeys <<- queueKeys[-index]
+    queueValues <<- queueValues[-index]
+  }
+  
+  list(insert = insert, pop = pop, empty = empty, contains = contains, remove = remove)
 }
+
 # AAAAAAAAAAAAAAAAAAAAA
 nextMove=function(path){
   if (isTRUE(length(path)==1)){
     return(5)
   }
-  current_x=path[1][1]
-  current_y=path[1][2]
-  next_x=path[2][1]
-  next_y=path[2][2]
+  current_x=path[[1]][1]
+  current_y=path[[1]][2]
+  next_x=path[[2]][1]
+  next_y=path[[2]][2]
   if (isTRUE(nextX > currX)) {
     return (6) # Right
   }
@@ -251,10 +318,166 @@ package_goal=function(from,packages){
 
 
 
-A_search = function(){
+# Astarsearch=function(from,to,roads,pasckages){
+#   visited=List()
+#   frontier=PriorityQueue()
+#   path=list()
+
+#   frontier$insert(0,from)
+
+#   while (!frontier$empty()){
+#     node=frontier$pop()
+
+#     if (node[1] == to[1] && node[2] == to[2]){
+#       return (Path_Record(start_location=from, end_location=to, path))
+#     }
+
+#     neis = Neighbors_search(node[1], node[2], roads)
+#     for (i in 1:dim(neis)[1]){
+#       neighbor = neis[i, 1]
+#       if(visited$exists(neighbor)){
+#         next
+#       }else{
+#         f_X = get_Fx(roads=roads, path=Path_Record(from, neighbor, path),
+#         temp_goal=to)
+#       }
+#     }
+#   }
+
+
+
+# }
+VisitedSet <- function() {
+  visited <- new.env(hash = TRUE, parent = emptyenv())
   
+  insert <- function(node) {
+    node_str <- paste(node, collapse = ",")
+    assign(node_str, TRUE, envir = visited)
+  }
+  
+  contains <- function(node) {
+    node_str <- paste(node, collapse = ",")
+    exists_in_visited <- exists(node_str, envir = visited, inherits = FALSE)
+    return(exists_in_visited)
+  }
+  
+  list(insert = insert, contains = contains)
 }
 
+
+Astarsearch <- function(from, to, roads, packages) {
+  # Initialize the open list (priority queue) and closed list (visited nodes)
+  visited <- VisitedSet()
+  frontier <- PriorityQueue()
+  cameFrom <- list()
+  
+  # Insert the start node into the frontier with f(n) = h(n)
+  h_n <- get_Hx(from, to)
+  frontier$insert(h_n, from)
+  
+  while (!frontier$empty()) {
+    # Pop the node with the lowest f(n)
+    node_info <- frontier$pop()
+    node <- node_info$value
+    node_key <- node_info$key
+    node_str <- paste(node, collapse = ",")
+    
+    # If the node is the goal, reconstruct and return the path
+    if (all(node == to)) {
+      return(Path_Record(from, node, cameFrom))
+    }
+    
+    # Add the node to the closed list
+    visited$insert(node)
+    
+    # For each neighbor of the node
+    neighbors <- Neighbors_search(node[1], node[2], roads)
+    for (i in 1:nrow(neighbors)) {
+      neighbor <- neighbors[i, ]
+      neighbor_str <- paste(neighbor, collapse = ",")
+      
+      # If neighbor is in the closed list, skip it
+      if (visited$contains(neighbor)) {
+        next
+      }
+      
+      # Calculate tentative g(n) for neighbor
+      temp_path <- Path_Record(from, neighbor, cameFrom)
+      g_n <- get_Gx(roads, temp_path)
+      
+      # Calculate h(n)
+      h_n <- get_Hx(neighbor, to)
+      
+      # Calculate f(n) = g(n) + h(n)
+      f_n <- g_n + h_n
+      
+      # Check if neighbor is already in frontier with a higher f(n)
+      idx_in_frontier <- frontier$contains(neighbor)
+      if (idx_in_frontier > 0) {
+        existing_key <- frontier$queueKeys[idx_in_frontier]
+        if (f_n < existing_key) {
+          # Remove the old entry with higher f(n)
+          frontier$remove(idx_in_frontier)
+          # Insert the neighbor with the new lower f(n)
+          frontier$insert(f_n, neighbor)
+          # Update path
+          cameFrom[[neighbor_str]] <- node
+        }
+      } else {
+        # Insert the neighbor into the frontier
+        frontier$insert(f_n, neighbor)
+        # Record the path
+        cameFrom[[neighbor_str]] <- node
+      }
+    }
+  }
+  
+  # If we exit the loop, no path was found
+  return(NULL)
+}
+
+getDeliveryLocation=function(packages) {
+  return (packages[which(packages[,5] %in% c(1) == TRUE),])
+}
+# AstarsearchDM=function(roads, car, packages) {
+#   from = c(car$x, car$y)
+#   to = NULL
+#   if(car$load != 0) {
+#     to = getDeliveryLocation(packages)[3:4]
+#   } else {
+#     to = package_goal(from, packages)[1:2]
+#   }
+
+#   path = Astarsearch(from, to, roads, packages)
+#   car$nextMove = nextMove(path)
+#   return (car)
+# }
+AstarsearchDM = function(roads, car, packages) {
+  from = c(car$x, car$y)
+  to = NULL
+  if (car$load != 0) {
+    to = getDeliveryLocation(packages)[3:4]
+  } else {
+    goal_package = package_goal(from, packages)
+    if (is.null(goal_package) || length(goal_package) == 0) {
+      # No packages to pick up
+      car$nextMove = 5 # Stay still
+      return (car)
+    }
+    to = goal_package[1:2]
+  }
+
+  path = Astarsearch(from, to, roads, packages)
+  
+  if (is.null(path) || length(path) < 1) {
+    # No valid path found
+    car$nextMove = 5 # Stay still
+    return (car)
+  }
+  
+  car$nextMove = nextMove(path)
+  return (car)
+}
 
 #' testDM
 #'
@@ -395,6 +618,9 @@ packageOn<-function(x,y,packages){
     return (available[1])
   }
   return (0)
+}
+Astartsearch=function(from,to,roads,package){
+  si
 }
 #' @keywords internal
 processNextMove<-function(car,roads,dim) {
