@@ -115,7 +115,7 @@ PriorityQueue <- function() {
 # and verity if a particular element exists or not，
 # this can be used to check if current node has been used before
 # 本函数也需要被修改
-List <- function() {
+Visited_Nodes <- function() {
   listValues <- NULL
   insert <- function(value) {
     valueStr <- paste(value, collapse = ",")
@@ -206,7 +206,7 @@ A_Search = function(from, to, roads, packages) {
   xSize = dim(roads$hroads)[1]
   ySize = dim(roads$vroads)[2]
   
-  visited = List()  # 用于记录已经访问过的节点
+  visited = Visited_Nodes()  # 用于记录已经访问过的节点
   frontier = PriorityQueue()  # 优先队列用于扩展节点
   path = list()  # 用于记录路径
   pathCost = list()  # 新增：用于记录每个节点的路径代价
@@ -303,7 +303,7 @@ getPackage=function(from, packages){
 }
 
 # Solve the DeliveryMan assignment using the A* search
-A_SearchDM=function(roads, car, packages) {
+myFunction=function(roads, car, packages) {
   from = c(car$x, car$y)
   to = NULL
   if(car$load != 0) {
