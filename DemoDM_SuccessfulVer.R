@@ -59,38 +59,26 @@ manualDM=function(roads,car,packages) {
   if (car$nextMove=="q") {stop("Game terminated on user request.")}
   return (car)
 }
-averageTest <- function(tests){
-  sum = 0
-  for (i in 1:tests) {
-    sum=sum+runDeliveryMan(A_SearchDM, dim = 10, turns = 2000, doPlot = F, pause = 0, del = 5)
-    if(i%%10==0){
-      print(i)
-      print(sum/i)
-    }
-  }
-  print(sum/i)
-  return(0)
-}
+
 
 # Source: http://rosettacode.org/wiki/Priority_queue#R
 # Source: https://search.r-project.org/CRAN/refmans/collections/html/priority_queue.html
-# AAAAA, 必须修改的代码段落，你们看看吧
+# Updating and sorting based on the priority
 PriorityQueue <- function() {
   queueKeys <<- queueValues <<- NULL
   insert <- function(key, value) {
-    # 检查是否已经存在该值，并根据代价决定是否替换
+    # Check whether the value already exists, and decide whether to replace it based on the cost
     index = getValueIndex(value)
     if(length(index) > 0) {
       if(isTRUE(key < queueKeys[[index]])) {
         queueKeys <<- queueKeys[-index]
         queueValues <<- queueValues[-index]
       } else {
-        # 跳过插入操作
         return
       }
     }
     
-    # 插入新的值并排序
+    # Insert the new value and sort.
     temp <- c(queueKeys, key)
     ord <- order(temp)
     queueKeys <<- temp[ord]
@@ -114,8 +102,7 @@ PriorityQueue <- function() {
 # A simple lists which allows to insert elements on it
 # and verity if a particular element exists or not，
 # this can be used to check if current node has been used before
-# 本函数也需要被修改
-Visited_Nodes <- function() {
+Visited_list <- function() {
   listValues <- NULL
   insert <- function(value) {
     valueStr <- paste(value, collapse = ",")
@@ -144,7 +131,7 @@ get_Gx=function(roads, path){
       }else{
         cost = cost + roads$vroads[path[[i+1]][2], path[[i+1]][1]]
       }
-    }else{
+    }else{#Movinghorizontally
       if(path[[i]][1] > path[[i+1]][1])
       {
         cost = cost + roads$hroads[path[[i+1]][2], path[[i+1]][1]]
@@ -171,7 +158,6 @@ get_Fx = function(roads, path, temp_goal){
 #' In A* algorithm, we need to check all neighbors of the current
 #' node we are looking at, so we need to define a function to search for
 #' every neighbors
-
 # Return all available neighbors given a location
 Neighbors_search = function(x, y, roads){
   x_limit = dim(roads$hroads)[1]
@@ -187,7 +173,7 @@ Neighbors_search = function(x, y, roads){
   neighbors = neighbors[neighbors[,2] < y_limit+1,]
   return (neighbors)
 }
-
+# Recording the path
 Path_Record = function(start_location, end_location, path){
   vectors = list(c(end_location)) # initialize the path from the end_location
   curr = paste(end_location, collapse = ",") # Choose a start
@@ -201,22 +187,22 @@ Path_Record = function(start_location, end_location, path){
   # return path from start to our goal
   return (rev(vectors))
 }
-# aStarSearch
+
 A_Search = function(from, to, roads, packages) {
   xSize = dim(roads$hroads)[1]
   ySize = dim(roads$vroads)[2]
   
-  visited = Visited_Nodes()  # 用于记录已经访问过的节点
-  frontier = PriorityQueue()  # 优先队列用于扩展节点
-  path = list()  # 用于记录路径
-  pathCost = list()  # 新增：用于记录每个节点的路径代价
+  visited = Visited_list()  # Recording visited nodes
+  frontier = PriorityQueue()  # storing nodes that require priority search 
+  path = list()  # Recording path
+  pathCost = list()  # Recording the cost of paths
   
-  frontier$insert(0, from)  # 初始代价为0，插入起点
-  pathCost[[paste(from, collapse = ",")]] = 0  # 起点路径代价设为0
+  frontier$insert(0, from)  # Initializing cost as 0, and inserting the start node 
+  pathCost[[paste(from, collapse = ",")]] = 0  # Initializing the cost of path as 0
   while (!frontier$empty()) {
     node = frontier$pop()
     
-    # 如果到达目标节点，生成路径并返回
+    # If get the goal node, generating path and return result
     if (node[1] == to[1] && node[2] == to[2]) {
       return (Path_Record(from, node, path))
     }
@@ -225,28 +211,28 @@ A_Search = function(from, to, roads, packages) {
     for (i in 1:dim(neighbors)[1]) {
       neighbor = neighbors[i,]
       
-      # 检查是否已经访问过该节点
+      # Checking if had visited the node
       if (!visited$exists(neighbor)) {
-        # 计算到该邻居节点的路径代价
+        # Caculating the cost of path to neighbor node
         currentCost = pathCost[[paste(node, collapse = ",")]] + get_Gx(roads, list(node, neighbor))
         
-        # 如果邻居节点已经在 pathCost 中且代价更高，则更新
+        # If the neighbor node is already in pathCost and has a higher cost, update it.
         neighborStr = paste(neighbor, collapse = ",")
         if (is.null(pathCost[[neighborStr]]) || currentCost < pathCost[[neighborStr]]) {
-          pathCost[[neighborStr]] = currentCost  # 更新邻居节点的最小代价
-          path[[neighborStr]] = node  # 更新邻居节点的前驱节点
-          combinedCost = currentCost + get_Hx(neighbor, to)  # 结合代价计算
+          pathCost[[neighborStr]] = currentCost  # Updating the least cost 
+          path[[neighborStr]] = node  # updating the frontier of neighbor
+          combinedCost = currentCost + get_Hx(neighbor, to) 
           
-          # 将邻居节点插入到优先队列中
+          # Inserting neighbor's node to priority Queue
           frontier$insert(combinedCost, neighbor)
         }
       }
     }
-    visited$insert(node)  # 将节点标记为已访问
+    visited$insert(node)  # signing the node as visited
   }
 }
 
-# Given a path, return the best next move car can make towards goal
+
 generateNextMove=function(path) {
   if(isTRUE(length(path) == 1)) {
     # This happens when the package pickup and delivery locations are equal
@@ -258,7 +244,7 @@ generateNextMove=function(path) {
   nextX = path[[2]][1]
   nextY = path[[2]][2]
   
-  # Move is horizontal
+
   if (isTRUE(nextX > currX)) {
     return (6) # Right
   }
@@ -266,7 +252,6 @@ generateNextMove=function(path) {
     return (4) # Left
   }
   
-  # Move is vertical
   if (isTRUE(nextY > currY)) {
     return (8) # Up
   }
@@ -282,13 +267,13 @@ getPackage=function(from, packages){
   costs = NULL
   unpicked_package = subset(packages, packages[,5] == 0)
   
-  # 如果没有包裹需要取，返回空
+  # If there is no package
   if (nrow(unpicked_package) == 0) {
     print("No unpicked packages available.")
-    return (NULL)  # 没有包裹
+    return (NULL)  
   }
   
-  # 计算每个包裹的取送代价
+  # Calculating Manhattan cost of every packages
   for (i in 1:nrow(unpicked_package)){
     package = unpicked_package[i,]
     pickup_location = package[1:2]
@@ -298,7 +283,7 @@ getPackage=function(from, packages){
     costs = c(costs, pickup_cost + delivery_cost)
   }
   
-  # 返回代价最小的包裹
+  # Return the least cost of package
   return (unpicked_package[which.min(costs),])
 }
 
@@ -408,7 +393,7 @@ testDM=function(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250
 #' @param del The number of deliveries. You will be scored on a board with 5 deliveries.
 #' @return A string describing the outcome of the game.
 #' @export
-runDeliveryMan <- function (carReady=manualDM,dim=10,turns=2000,
+runDeliveryMan <- function (carReady=myFunction,dim=10,turns=2000,
                             doPlot=T,pause=0.1,del=5,verbose=T) {
   roads=makeRoadMatrices(dim)
   car=list(x=1,y=1,wait=0,load=0,nextMove=NA,mem=list())
