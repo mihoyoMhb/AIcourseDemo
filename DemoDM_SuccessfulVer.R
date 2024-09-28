@@ -172,16 +172,16 @@ get_Gx=function(roads, path){
     if(path[[i]][1] == path[[i+1]][1]){ # This means the car will move vertically
       if(path[[i]][2] < path[[i+1]][2])
       {
-        cost = cost + roads$vroads[path[[i]][2], path[[i]][1]]
+        cost = cost + roads$vroads[path[[i]][1], path[[i]][2]]
       }else{
-        cost = cost + roads$vroads[path[[i+1]][2], path[[i+1]][1]]
+        cost = cost + roads$vroads[path[[i+1]][1], path[[i+1]][2]]
       }
     }else{ # or the car will move horizontally
       if(path[[i]][1] > path[[i+1]][1])
       {
-        cost = cost + roads$hroads[path[[i+1]][2], path[[i+1]][1]]
+        cost = cost + roads$hroads[path[[i+1]][1], path[[i+1]][2]]
       }else{
-        cost = cost + roads$hroads[path[[i]][2], path[[i]][1]]
+        cost = cost + roads$hroads[path[[i]][1], path[[i]][2]]
       }
     }
   }
@@ -205,8 +205,8 @@ get_Fx = function(roads, path, temp_goal){
 #' every neighbors
 # Return all available neighbors given a location
 Neighbors_search = function(x, y, roads){
-  x_limit = dim(roads$hroads)[1]
-  y_limit = dim(roads$vroads)[2]
+  x_limit = dim(roads$hroads)[2]
+  y_limit = dim(roads$vroads)[1]
   neighbors = matrix(, nrow = 4, ncol=2, byrow = TRUE)
   # Add all possible horizontal and vertical neighbors
   neighbors[,1] = c(x - 1, x, x, x + 1)
@@ -445,7 +445,7 @@ testDM=function(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250
 #' @param del The number of deliveries. You will be scored on a board with 5 deliveries.
 #' @return A string describing the outcome of the game.
 #' @export
-runDeliveryMan <- function (carReady=myFunction,dim=10,turns=2000,
+runDeliveryMan <- function (carReady=manualDM,dim=10,turns=2000,
                             doPlot=T,pause=0.1,del=5,verbose=T) {
   roads=makeRoadMatrices(dim)
   car=list(x=1,y=1,wait=0,load=0,nextMove=NA,mem=list())
@@ -501,7 +501,7 @@ processNextMove<-function(car,roads,dim) {
   nextMove=car$nextMove
   if (nextMove==8) {
     if (car$y!=dim) {
-      car$wait=roads$vroads[car$y,car$x]
+      car$wait=roads$vroads[car$x,car$y]
       car$y=car$y+1
     } else {
       warning(paste("Cannot move up from y-position",car$y))
@@ -509,20 +509,20 @@ processNextMove<-function(car,roads,dim) {
   } else if (nextMove==2) {
     if (car$y!=1) {
       car$y=car$y-1
-      car$wait=roads$vroads[car$y,car$x]
+      car$wait=roads$vroads[car$x,car$y]
     } else {
       warning(paste("Cannot move down from y-position",car$y))
     }
   }  else if (nextMove==4) {
     if (car$x!=1) {
       car$x=car$x-1
-      car$wait=roads$hroads[car$y,car$x]
+      car$wait=roads$hroads[car$x,car$y]
     } else {
       warning(paste("Cannot move left from x-position",car$x))
     }
   }  else if (nextMove==6) {
     if (car$x!=dim) {
-      car$wait=roads$hroads[car$y,car$x]
+      car$wait=roads$hroads[car$x,car$y]
       car$x=car$x+1
     } else {
       warning(paste("Cannot move right from x-position",car$x))
@@ -549,8 +549,8 @@ makeDotGrid<-function(n,i) {
 
 #' @keywords internal
 makeRoadMatrices<-function(n){
-  hroads=matrix(rep(1,n*(n-1)),nrow=n)
-  vroads=matrix(rep(1,(n-1)*n),nrow=n-1)
+  hroads=matrix(rep(1,n*(n-1)),nrow=n-1)
+  vroads=matrix(rep(1,(n-1)*n),nrow=n)
   list(hroads=hroads,vroads=vroads)
 }
 
