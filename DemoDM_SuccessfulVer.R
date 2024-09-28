@@ -292,7 +292,15 @@ getPackage=function(from, packages){
     #' costs = c(costs, package_cost)
     #' The 'testDM' will raise: 
     #' "You failed to complete the task. Try again."
-    costs = c(costs, pickup_cost+delivery_cost)
+    #' Additionally, if we ignore the delivery cost, then we will run faster
+    #' costs = c(costs, pickup_cost+0*delivery_cost)
+    #' testDM(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250)
+    #' [1] 171.458
+    #' Source: 'Assignment 1: Delivery Man' introduction
+    #' or if we set the value like the code below, then we have:
+    #' costs = c(costs, pickup_cost+1*delivery_cost)
+    #' 178.08 steps
+    costs = c(costs, pickup_cost+0*delivery_cost)
   }
   
   # Return the least cost of package
