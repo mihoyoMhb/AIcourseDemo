@@ -6,6 +6,25 @@
 #' Yuanjing Yang
 #' Linjia Zhong
 
+#####################################
+#' Quetions?
+#' In your function, you set up a function called:
+#' 
+#' @keywords internal
+#' makeRoadMatrices<-function(n){
+#'   hroads=matrix(rep(1,n*(n-1)),nrow=n-1)
+#'   vroads=matrix(rep(1,(n-1)*n),nrow=n)
+#'   list(hroads=hroads,vroads=vroads)
+#'}
+#'
+#'In my opinion, if we have to store the edge cost of the roads, the hroads
+#'should be hroads=matrix(rep(1,n*(n-1)),nrow=n) cuz we have n rows? This also
+#'be true for vroads=matrix(rep(1,(n-1)*n),nrow=n-1).
+#'This question made me feel confused, and it takes me a lot of time to debug.
+#'I would be appreciate if you could tell me the difference between these codes!
+#####################################
+
+# Main par funtions
 # updating and sorting based on the priority
 # Our inspiration for writing this function comes from sources:
 
