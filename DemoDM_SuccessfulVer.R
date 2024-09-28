@@ -1,3 +1,13 @@
+#' The code implementation of this assignment was developed collaboratively by 
+#' our group and is hosted on GitHub. The repository link is: 
+#' https://github.com/mihoyoMhb/AIcourseDemo.
+#' Group members:
+#' Hangbiao Meng
+#' Yuanjing Yang
+#' Linjia Zhong
+
+
+
 #' dumbDM
 #'
 #' This control function just moves randomly, until all packages are picked up and delivered by accident!
@@ -61,16 +71,18 @@ manualDM=function(roads,car,packages) {
 }
 
 
-# Source: http://rosettacode.org/wiki/Priority_queue#R
-# Source: https://search.r-project.org/CRAN/refmans/collections/html/priority_queue.html
-# Updating and sorting based on the priority
+# updating and sorting based on the priority
+# Our inspiration for writing this function comes from sources:
+# Source: CRAN. https://search.r-project.org/CRAN/refmans/collections/html/priority_queue.html
+# Source: Bengü Erenler. Delivery Man. GitHub repository. https://github.com/benguerenler6565/delivery-man
+# Source: Rosetta Code. http://rosettacode.org/wiki/Priority_queue#R
 PriorityQueue <- function() {
   queueKeys <<- queueValues <<- NULL
   insert <- function(key, value) {
     # Check whether the value already exists, and decide whether to replace it based on the cost
     index = getValueIndex(value)
     if(length(index) > 0) {
-      if(isTRUE(key < queueKeys[[index]])) {
+      if(key < queueKeys[[index]]) {
         queueKeys <<- queueKeys[-index]
         queueValues <<- queueValues[-index]
       } else {
@@ -98,7 +110,6 @@ PriorityQueue <- function() {
   list(insert = insert, pop = pop, empty = empty)
 }
 
-
 # A simple lists which allows to insert elements on it
 # and verity if a particular element exists or not，
 # this can be used to check if current node has been used before
@@ -118,20 +129,20 @@ Visited_list <- function() {
 
 #' Now it is time to write our own code for A* search algorithm
 #' The cost of V_roads and H_roads are different, needs to be calculated separately
-#' This function is to calculate the g(x) in f(x) = g(x) + h(x) where h(x) means the ManhattanDistance
+#' This function is to calculate the g(x) in f(x) = g(x) + h(x) 
+#' where h(x) means the ManhattanDistance
 get_Gx=function(roads, path){
   # initialize cost
   cost = 0
   for(i in 1:(length(path)-1)){
-    MovingVertically = path[[i]][1] == path[[i+1]][1]
-    if(MovingVertically){
+    if(path[[i]][1] == path[[i+1]][1]){ # This means the car will move vertically
       if(path[[i]][2] < path[[i+1]][2])
       {
         cost = cost + roads$vroads[path[[i]][2], path[[i]][1]]
       }else{
         cost = cost + roads$vroads[path[[i+1]][2], path[[i+1]][1]]
       }
-    }else{#Movinghorizontally
+    }else{ # or the car will move horizontally
       if(path[[i]][1] > path[[i+1]][1])
       {
         cost = cost + roads$hroads[path[[i+1]][2], path[[i+1]][1]]
@@ -233,33 +244,27 @@ A_Search = function(from, to, roads, packages) {
 }
 
 
-generateNextMove=function(path) {
-  if(isTRUE(length(path) == 1)) {
+ProcessNextMove=function(path) {
+  if(length(path) == 1) {
     # This happens when the package pickup and delivery locations are equal
+    # Then our car stays still
     return (5)
-  }
+  }else{
+    currX = path[[1]][1]
+    currY = path[[1]][2]
+    nextX = path[[2]][1]
+    nextY = path[[2]][2]
+    if (nextX > currX) {
+      return (6)  # Right
+    } else if (nextX < currX) {
+      return (4)  # Left
+    } else if (nextY > currY) {
+      return (8)  # Up
+    } else if (nextY < currY) {
+      return (2)  # Down
+  }}
   
-  currX = path[[1]][1]
-  currY = path[[1]][2]
-  nextX = path[[2]][1]
-  nextY = path[[2]][2]
-  
-
-  if (isTRUE(nextX > currX)) {
-    return (6) # Right
-  }
-  if (isTRUE(nextX < currX)) {
-    return (4) # Left
-  }
-  
-  if (isTRUE(nextY > currY)) {
-    return (8) # Up
-  }
-  if (isTRUE(nextY < currY)) {
-    return (2) # Down
-  }
-  
-  print('Error! Unable to find a suitable move.')
+  print('Path is not correct! Check your code')
 }
 
 # Return a package pickup location which will be used as the goal for a particular search
@@ -280,12 +285,20 @@ getPackage=function(from, packages){
     delivery_location = package[3:4]
     pickup_cost = get_Hx(from, pickup_location)
     delivery_cost = get_Hx(pickup_location, delivery_location)
-    costs = c(costs, pickup_cost + delivery_cost)
+    #' Question? Do we need to calculate the pickup_cost and delivery_cost like
+    #' package_cost = get_Hx(from, delivery_location)?
+    #' or respectively?
+    #' package_cost = get_Hx(from, delivery_location)
+    #' costs = c(costs, package_cost)
+    #' The 'testDM' will raise: 
+    #' "You failed to complete the task. Try again."
+    costs = c(costs, pickup_cost+delivery_cost)
   }
   
   # Return the least cost of package
   return (unpicked_package[which.min(costs),])
 }
+
 
 # Solve the DeliveryMan assignment using the A* search
 myFunction=function(roads, car, packages) {
@@ -300,7 +313,7 @@ myFunction=function(roads, car, packages) {
   }
   
   path = A_Search(from, to, roads, packages)
-  car$nextMove = generateNextMove(path)
+  car$nextMove = ProcessNextMove(path)
   return (car)
 }
 #' testDM
