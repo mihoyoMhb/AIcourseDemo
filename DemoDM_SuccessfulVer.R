@@ -1,12 +1,3 @@
-#' The code implementation of this assignment was developed collaboratively by 
-#' our group and is hosted on GitHub. The repository link is: 
-#' https://github.com/mihoyoMhb/AIcourseDemo.
-#' Group members:
-#' Hangbiao Meng
-#' Yuanjing Yang
-#' Linjia Zhong
-
-
 
 #' dumbDM
 #'
@@ -71,6 +62,33 @@ manualDM=function(roads,car,packages) {
 }
 
 
+#' The code implementation of this assignment was developed collaboratively by 
+#' our group and is hosted on GitHub. The repository link is: 
+#' https://github.com/mihoyoMhb/AIcourseDemo.
+#' Group members:
+#' Hangbiao Meng
+#' Yuanjing Yang
+#' Linjia Zhong
+
+#####################################
+#' Quetions1
+#' In your function, you set up a function called:
+#' 
+#' @keywords internal
+#' makeRoadMatrices<-function(n){
+#'   hroads=matrix(rep(1,n*(n-1)),nrow=n-1)
+#'   vroads=matrix(rep(1,(n-1)*n),nrow=n)
+#'   list(hroads=hroads,vroads=vroads)
+#'}
+#'
+#'In my opinion, if we have to store the edge cost of the roads, the hroads
+#'should be hroads=matrix(rep(1,n*(n-1)),nrow=n) cuz we have n rows? This also
+#'be true for vroads=matrix(rep(1,(n-1)*n),nrow=n-1).
+#'This question made me feel confused, and it takes me a lot of time to debug.
+#'I would be appreciate if you could tell me the difference between these codes!
+#####################################
+
+# Main par funtions
 # updating and sorting based on the priority
 # Our inspiration for writing this function comes from sources:
 
@@ -270,30 +288,6 @@ A_Search = function(from, to, roads, packages) {
   }
 }
 
-
-ProcessNextMove=function(path) {
-  if(length(path) == 1) {
-    # This happens when the package pickup and delivery locations are equal
-    # Then our car stays still
-    return (5)
-  }else{
-    currX = path[[1]][1]
-    currY = path[[1]][2]
-    nextX = path[[2]][1]
-    nextY = path[[2]][2]
-    if (nextX > currX) {
-      return (6)  # Right
-    } else if (nextX < currX) {
-      return (4)  # Left
-    } else if (nextY > currY) {
-      return (8)  # Up
-    } else if (nextY < currY) {
-      return (2)  # Down
-  }}
-  
-  print('Path is not correct! Check your code')
-}
-
 # Return a package pickup location which will be used as the goal for a particular search
 getPackage=function(from, packages){
   costs = NULL
@@ -312,7 +306,7 @@ getPackage=function(from, packages){
     delivery_location = package[3:4]
     pickup_cost = get_Hx(from, pickup_location)
     delivery_cost = get_Hx(pickup_location, delivery_location)
-    #' Question? Do we need to calculate the pickup_cost and delivery_cost like
+    #' Question2: Do we need to calculate the pickup_cost and delivery_cost like
     #' package_cost = get_Hx(from, delivery_location)?
     #' or respectively?
     #' package_cost = get_Hx(from, delivery_location)
@@ -322,7 +316,8 @@ getPackage=function(from, packages){
     #' Additionally, if we ignore the delivery cost, then we will run faster
     #' costs = c(costs, pickup_cost+0*delivery_cost)
     #' testDM(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250)
-    #' [1] 171.458
+    #' Mean: 171.94
+    #' Std Dev: 37.63234
     #' Source: 'Assignment 1: Delivery Man' introduction
     #' or if we set the value like the code below, then we have:
     #' costs = c(costs, pickup_cost+1*delivery_cost)
@@ -348,7 +343,26 @@ myFunction=function(roads, car, packages) {
   }
   
   path = A_Search(from, to, roads, packages)
-  car$nextMove = ProcessNextMove(path)
+  nextMove = 0
+  if(length(path) == 1) {
+    # This happens when the package pickup and delivery locations are equal
+    # Then our car stays still
+    nextMove <- 5
+  }else{
+    currX = path[[1]][1]
+    currY = path[[1]][2]
+    nextX = path[[2]][1]
+    nextY = path[[2]][2]
+    if (nextX > currX) {
+      nextMove <- 6  # Right
+    } else if (nextX < currX) {
+      nextMove <- 4  # Left
+    } else if (nextY > currY) {
+      nextMove <- 8  # Up
+    } else if (nextY < currY) {
+      nextMove <- 2  # Down
+    }}
+  car$nextMove = nextMove
   return (car)
 }
 #' testDM
