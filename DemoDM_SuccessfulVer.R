@@ -73,40 +73,74 @@ manualDM=function(roads,car,packages) {
 
 # updating and sorting based on the priority
 # Our inspiration for writing this function comes from sources:
-# Source: CRAN. https://search.r-project.org/CRAN/refmans/collections/html/priority_queue.html
+
 # Source: Bengü Erenler. Delivery Man. GitHub repository. https://github.com/benguerenler6565/delivery-man
 # Source: Rosetta Code. http://rosettacode.org/wiki/Priority_queue#R
 PriorityQueue <- function() {
-  queueKeys <<- queueValues <<- NULL
+  # Initialize the queues
+  # 'queueKeys' means all costs and 'queueValues' means nodes in our A* search
+  queueKeys <- numeric()
+  queueValues <- list()
+  
+  
+  # Insert method
   insert <- function(key, value) {
-    # Check whether the value already exists, and decide whether to replace it based on the cost
-    index = getValueIndex(value)
-    if(length(index) > 0) {
-      if(key < queueKeys[[index]]) {
+    # Initialize index as NULL
+    index <- NULL
+    
+    # Check if the value already exists in queueValues
+    if (length(queueValues) > 0) {
+      # Find the index of the existing value
+      existing_indices <- sapply(queueValues, function(v) identical(v, value))
+      index <- which(existing_indices)
+    }
+    
+    if (length(index) > 0) {
+      # Value exists, check if the new key is lower (i.e., better)
+      index <- index[1]  
+      # In case there are multiple, take the first one,
+      # 
+      if (key < queueKeys[index]) {
+        # Remove the old entry with the higher key
         queueKeys <<- queueKeys[-index]
         queueValues <<- queueValues[-index]
       } else {
-        return
+        # Existing key is better or equal; do not insert
+        return()
       }
     }
     
-    # Insert the new value and sort.
-    temp <- c(queueKeys, key)
-    ord <- order(temp)
-    queueKeys <<- temp[ord]
-    queueValues <<- c(queueValues, list(value))[ord]
+    # Insert the new value and sort the queue
+    queueKeys <<- c(queueKeys, key)
+    queueValues <<- c(queueValues, list(value))
+    # Order the queue based on the keys
+    ord <- order(queueKeys)
+    queueKeys <<- queueKeys[ord]
+    queueValues <<- queueValues[ord]
   }
-  
+  #' Source: CRAN. https://search.r-project.org/CRAN/refmans/collections/html/priority_queue.html
+  #' Here, the website introduces that there are some methods we need to build
+  #' within the queue, they are:
+  #' $push(item, priority = 0)
+  #' $pop()
+  #' $clear().$size()
+  #' $as_list()
+  #' $print()
+  #' But for this assignment, we may just need $pop and an extra $empty method
   pop <- function() {
+    if (length(queueValues) == 0) {
+      return(NULL)
+    }
     head <- queueValues[[1]]
     queueValues <<- queueValues[-1]
     queueKeys <<- queueKeys[-1]
-    return (head)
+    return(head)
   }
   
-  empty <- function() {length(queueKeys) == 0}
-  getValueIndex <- function(value) which(queueValues %in% list(value) == TRUE)
-  
+  empty <- function() {
+    length(queueKeys) == 0
+  }
+  # Return useful methods so we can call them later
   list(insert = insert, pop = pop, empty = empty)
 }
 
