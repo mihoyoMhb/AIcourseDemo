@@ -366,7 +366,6 @@ myFunction=function(roads, car, packages) {
 #' This set of seeds is chosen so as to include a tricky game that has pick ups and deliveries on the same
 #' spot. This will occur in the actual games you are evaluated on too.
 #'
-#'
 #' While this is dependent on the machine used, we expect your function to be able to run the 500 evaluation games on
 #' the evaluation machine in under 4 minutes (250 seconds). If the evaluation machine is slower than expected,
 #' this will be altered so that the required time is 25% slower than the par function.
