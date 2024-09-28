@@ -224,30 +224,6 @@ A_Search = function(from, to, roads, packages) {
   }
 }
 
-
-ProcessNextMove=function(path) {
-  if(length(path) == 1) {
-    # This happens when the package pickup and delivery locations are equal
-    # Then our car stays still
-    return (5)
-  }else{
-    currX = path[[1]][1]
-    currY = path[[1]][2]
-    nextX = path[[2]][1]
-    nextY = path[[2]][2]
-    if (nextX > currX) {
-      return (6)  # Right
-    } else if (nextX < currX) {
-      return (4)  # Left
-    } else if (nextY > currY) {
-      return (8)  # Up
-    } else if (nextY < currY) {
-      return (2)  # Down
-    }}
-  
-  print('Path is not correct! Check your code')
-}
-
 # Return a package pickup location which will be used as the goal for a particular search
 getPackage=function(from, packages){
   costs = NULL
@@ -302,6 +278,25 @@ myFunction=function(roads, car, packages) {
   }
   
   path = A_Search(from, to, roads, packages)
-  car$nextMove = ProcessNextMove(path)
+  nextMove = 0
+  if(length(path) == 1) {
+    # This happens when the package pickup and delivery locations are equal
+    # Then our car stays still
+    nextMove <- 5
+  }else{
+    currX = path[[1]][1]
+    currY = path[[1]][2]
+    nextX = path[[2]][1]
+    nextY = path[[2]][2]
+    if (nextX > currX) {
+      nextMove <- 6  # Right
+    } else if (nextX < currX) {
+      nextMove <- 4  # Left
+    } else if (nextY > currY) {
+      nextMove <- 8  # Up
+    } else if (nextY < currY) {
+      nextMove <- 2  # Down
+    }}
+  car$nextMove = nextMove
   return (car)
 }
