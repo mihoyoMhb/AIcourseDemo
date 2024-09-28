@@ -266,7 +266,7 @@ getPackage=function(from, packages){
     delivery_location = package[3:4]
     pickup_cost = get_Hx(from, pickup_location)
     delivery_cost = get_Hx(pickup_location, delivery_location)
-    #' Question? Do we need to calculate the pickup_cost and delivery_cost like
+    #' Question2: Do we need to calculate the pickup_cost and delivery_cost like
     #' package_cost = get_Hx(from, delivery_location)?
     #' or respectively?
     #' package_cost = get_Hx(from, delivery_location)
