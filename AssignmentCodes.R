@@ -7,7 +7,7 @@
 #' Linjia Zhong
 
 #####################################
-#' Quetions?
+#' Quetions1
 #' In your function, you set up a function called:
 #' 
 #' @keywords internal
@@ -252,7 +252,8 @@ getPackage=function(from, packages){
     #' Additionally, if we ignore the delivery cost, then we will run faster
     #' costs = c(costs, pickup_cost+0*delivery_cost)
     #' testDM(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250)
-    #' [1] 171.458
+    #' Mean: 171.94
+    #' Std Dev: 37.63234
     #' Source: 'Assignment 1: Delivery Man' introduction
     #' or if we set the value like the code below, then we have:
     #' costs = c(costs, pickup_cost+1*delivery_cost)
