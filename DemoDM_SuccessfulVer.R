@@ -200,9 +200,6 @@ Path_Record = function(start_location, end_location, path){
 }
 
 A_Search = function(from, to, roads, packages) {
-  xSize = dim(roads$hroads)[1]
-  ySize = dim(roads$vroads)[2]
-  
   visited = Visited_list()  # Recording visited nodes
   frontier = PriorityQueue()  # storing nodes that require priority search 
   path = list()  # Recording path
