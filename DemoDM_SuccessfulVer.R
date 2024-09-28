@@ -200,24 +200,6 @@ get_Fx = function(roads, path, temp_goal){
   return (get_Gx(roads, path) + get_Hx(curr_location, temp_goal))
 }
 
-#' In A* algorithm, we need to check all neighbors of the current
-#' node we are looking at, so we need to define a function to search for
-#' every neighbors
-# Return all available neighbors given a location
-Neighbors_search = function(x, y, roads){
-  x_limit = dim(roads$hroads)[2]
-  y_limit = dim(roads$vroads)[1]
-  neighbors = matrix(, nrow = 4, ncol=2, byrow = TRUE)
-  # Add all possible horizontal and vertical neighbors
-  neighbors[,1] = c(x - 1, x, x, x + 1)
-  neighbors[,2] = c(y, y + 1, y -1, y)
-  # Check any illegal neighbors
-  neighbors = neighbors[neighbors[,1] > 0,]
-  neighbors = neighbors[neighbors[,2] > 0,]
-  neighbors = neighbors[neighbors[,1] < x_limit+1,]
-  neighbors = neighbors[neighbors[,2] < y_limit+1,]
-  return (neighbors)
-}
 # Recording the path
 Path_Record = function(start_location, end_location, path){
   vectors = list(c(end_location)) # initialize the path from the end_location
@@ -249,7 +231,21 @@ A_Search = function(from, to, roads, packages) {
       return (Path_Record(from, node, path))
     }
     
-    neighbors = Neighbors_search(node[1], node[2], roads)
+    #' In A* algorithm, we need to check all neighbors of the current
+    #' node we are looking at, so we need to define a function to search for
+    #' every neighbors
+    # Return all available neighbors given a location
+    x_limit = dim(roads$hroads)[2]
+    y_limit = dim(roads$vroads)[1]
+    neighbors = matrix(, nrow = 4, ncol=2, byrow = TRUE)
+    # Add all possible horizontal and vertical neighbors
+    neighbors[,1] = c(node[1] - 1, node[1], node[1], node[1] + 1)
+    neighbors[,2] = c(node[2], node[2] + 1, node[2] -1, node[2])
+    # Check any illegal neighbors
+    neighbors = neighbors[neighbors[,1] > 0,]
+    neighbors = neighbors[neighbors[,2] > 0,]
+    neighbors = neighbors[neighbors[,1] < x_limit+1,]
+    neighbors = neighbors[neighbors[,2] < y_limit+1,]
     for (i in 1:dim(neighbors)[1]) {
       neighbor = neighbors[i,]
       
