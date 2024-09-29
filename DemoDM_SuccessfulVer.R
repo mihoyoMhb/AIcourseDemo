@@ -288,62 +288,54 @@ A_Search = function(from, to, roads, packages) {
   }
 }
 
-# Return a package pickup location which will be used as the goal for a particular search
-getPackage=function(from, packages){
-  costs = NULL
-  unpicked_package = subset(packages, packages[,5] == 0)
-  
-  # If there is no package
-  if (nrow(unpicked_package) == 0) {
-    print("No unpicked packages available.")
-    return (NULL)  
-  }
-  
-  # Calculating Manhattan cost of every packages
-  for (i in 1:nrow(unpicked_package)){
-    package = unpicked_package[i,]
-    pickup_location = package[1:2]
-    delivery_location = package[3:4]
-    pickup_cost = get_Hx(from, pickup_location)
-    delivery_cost = get_Hx(pickup_location, delivery_location)
-    #' Question2: Do we need to calculate the pickup_cost and delivery_cost like
-    #' package_cost = get_Hx(from, delivery_location)?
-    #' or respectively?
-    #' package_cost = get_Hx(from, delivery_location)
-    #' costs = c(costs, package_cost)
-    #' The 'testDM' will raise: 
-    #' "You failed to complete the task. Try again."
-    #' Additionally, if we ignore the delivery cost, then we will run faster
-    #' costs = c(costs, pickup_cost+0*delivery_cost)
-    #' testDM(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250)
-    #' Mean: 171.94
-    #' Std Dev: 37.63234
-    #' Source: 'Assignment 1: Delivery Man' introduction
-    #' or if we set the value like the code below, then we have:
-    #' costs = c(costs, pickup_cost+1*delivery_cost)
-    #' 178.08 steps
-    costs = c(costs, pickup_cost+0*delivery_cost)
-  }
-  
-  # Return the least cost of package
-  return (unpicked_package[which.min(costs),])
-}
-
-
 # Solve the DeliveryMan assignment using the A* search
 myFunction=function(roads, car, packages) {
   from = c(car$x, car$y)
   to = NULL
   if(car$load != 0) {
     # If the car is already loaded, then it should go to the delivery location
+    # The fifth column == 1 means the package was the chosen one
     to = packages[which(packages[,5] %in% c(1) == TRUE),][3:4]
   } else {
     # Or, to pick up the package
-    to = getPackage(from, packages)[1:2]
+    costs = NULL
+    unpicked_package = subset(packages, packages[,5] == 0)
+    
+    # If there is no package
+    if (nrow(unpicked_package) == 0) {
+      print("No unpicked packages available.")
+      return (NULL)  
+    }
+    for (i in 1:nrow(unpicked_package)){
+      package = unpicked_package[i,]
+      pickup_location = package[1:2]
+      delivery_location = package[3:4]
+      pickup_cost = get_Hx(from, pickup_location)
+      #' Question2: Do we need to calculate the pickup_cost and delivery_cost like
+      #' package_cost = get_Hx(from, delivery_location)?
+      #' or respectively?
+      #' package_cost = get_Hx(from, delivery_location)
+      #' costs = c(costs, package_cost)
+      #' The 'testDM' will raise: 
+      #' "You failed to complete the task. Try again."
+      #' Additionally, if we ignore the delivery cost, then we will run faster
+      #' costs = c(costs, pickup_cost+0*delivery_cost)
+      #' testDM(myFunction,verbose=0,returnVec=FALSE,n=500,seed=21,timeLimit=250)
+      #' Mean: 171.94
+      #' Std Dev: 37.63234
+      #' Source: 'Assignment 1: Delivery Man' introduction
+      #' or if we set the value like the code below, then we have:
+      #' costs = c(costs, pickup_cost+1*delivery_cost)
+      #' 178.08 steps
+      delivery_cost = get_Hx(pickup_location, delivery_location)
+      costs = c(costs, pickup_cost+0*delivery_cost)
+    }
+    to = unpicked_package[which.min(costs),][1:2]
   }
   
   path = A_Search(from, to, roads, packages)
   nextMove = 0
+  # Updating the next states
   if(length(path) == 1) {
     # This happens when the package pickup and delivery locations are equal
     # Then our car stays still
