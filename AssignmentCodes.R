@@ -189,8 +189,6 @@ A_Search = function(from, to, roads, packages) {
     #' node we are looking at, so we need to define a function to search for
     #' every neighbors
     # Return all available neighbors given a location
-    x_limit = dim(roads$hroads)[2]
-    y_limit = dim(roads$vroads)[1]
     neighbors = matrix(, nrow = 4, ncol=2, byrow = TRUE)
     # Add all possible horizontal and vertical neighbors
     neighbors[,1] = c(node[1] - 1, node[1], node[1], node[1] + 1)
@@ -198,8 +196,8 @@ A_Search = function(from, to, roads, packages) {
     # Check any illegal neighbors
     neighbors = neighbors[neighbors[,1] > 0,]
     neighbors = neighbors[neighbors[,2] > 0,]
-    neighbors = neighbors[neighbors[,1] < x_limit+1,]
-    neighbors = neighbors[neighbors[,2] < y_limit+1,]
+    neighbors = neighbors[neighbors[,1] < dim(roads$hroads)[2]+1,]
+    neighbors = neighbors[neighbors[,2] < dim(roads$vroads)[1]+1,]
     for (i in 1:dim(neighbors)[1]) {
       neighbor = neighbors[i,]
       
