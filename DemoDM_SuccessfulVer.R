@@ -61,7 +61,6 @@ manualDM=function(roads,car,packages) {
   return (car)
 }
 
-
 #' The code implementation of this assignment was developed collaboratively by 
 #' our group and is hosted on GitHub. The repository link is: 
 #' https://github.com/mihoyoMhb/AIcourseDemo.
@@ -218,20 +217,6 @@ get_Fx = function(roads, path, temp_goal){
   return (get_Gx(roads, path) + get_Hx(curr_location, temp_goal))
 }
 
-# Recording the path
-Path_Record = function(start_location, end_location, path){
-  vectors = list(c(end_location)) # initialize the path from the end_location
-  curr = paste(end_location, collapse = ",") # Choose a start
-  
-  # Recurse the path until we reach the start of path
-  while(!all(curr == paste(start_location, collapse = ","))){
-    node = path[[curr]] # Get the previous node
-    vectors = c(vectors, list(node)) # Add to the path
-    curr = paste(node, collapse = ",")
-  }
-  # return path from start to our goal
-  return (rev(vectors))
-}
 
 A_Search = function(from, to, roads, packages) {
   visited = Visited_list()  # Recording visited nodes
@@ -246,7 +231,19 @@ A_Search = function(from, to, roads, packages) {
     
     # If get the goal node, generating path and return result
     if (node[1] == to[1] && node[2] == to[2]) {
-      return (Path_Record(from, node, path))
+      vectors = list(c(node)) # initialize the path from the node
+      curr = paste(node, collapse = ",") # Choose a start
+      
+      # Recurse the path until we reach the start of path
+      while(!all(curr == paste(from, collapse = ","))){
+        node = path[[curr]] # Get the previous node
+        vectors = c(vectors, list(node)) # Add to the path
+        curr = paste(node, collapse = ",")
+      }
+      # return path from start to our goal
+      # print(rev(vectors))
+      return (rev(vectors))
+      #return (Path_Record(from, node, path))
     }
     
     #' In A* algorithm, we need to check all neighbors of the current
